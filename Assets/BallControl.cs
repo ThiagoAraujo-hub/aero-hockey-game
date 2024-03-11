@@ -20,7 +20,7 @@ public class BallControl : MonoBehaviour
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
-        Invoke(nameof(GoBall), 2);
+        Invoke(nameof(GoBall), 1);
     }
 
     void Update()
