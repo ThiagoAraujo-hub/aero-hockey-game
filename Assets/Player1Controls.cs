@@ -24,8 +24,14 @@ public class Player1Controls : MonoBehaviour
 
     void Update()
     {
-        VelX();
-        VelY();
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var pos = transform.position;
+        pos.x = mousePos.x;
+        pos.y = mousePos.y;
+        transform.position = pos;
+
+        // VelX();
+        // VelY();
 
         BoundX();
         BoundY();
