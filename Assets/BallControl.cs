@@ -3,6 +3,10 @@ using UnityEngine;
 public class BallControl : MonoBehaviour
 {
     private Rigidbody2D rb2d;
+    private readonly float MaxSpeed = 15f;
+    private readonly float MinSpeed = 0.1f;
+    private readonly float DislodgeForce = 0.5f;
+
     void GoBall()
     {
         float rand = Random.Range(0, 4);
@@ -28,15 +32,46 @@ public class BallControl : MonoBehaviour
 
     }
 
-    void OnCollisionEnter2D(Collision2D coll)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (coll.collider.CompareTag("Player1") || coll.collider.CompareTag("Player2"))
+        if (collision.collider.CompareTag("Player1") || collision.collider.CompareTag("Player2"))
         {
             Vector2 vel;
             vel.x = rb2d.velocity.x;
-            vel.y = (rb2d.velocity.y / 2) + (coll.collider.attachedRigidbody.velocity.y / 3);
+            vel.y = rb2d.velocity.y;
+
+            if (vel.magnitude > MaxSpeed)
+                vel = vel.normalized * MaxSpeed;
+            else if (vel.magnitude < MinSpeed)
+                vel = vel.normalized * MinSpeed;
+
+            if (IsStuckInCorner())
+                rb2d.AddForce(DislodgeForce * -rb2d.velocity.normalized, ForceMode2D.Impulse);
+
             rb2d.velocity = vel;
         }
+    }
+
+    bool IsStuckInCorner()
+    {
+        Vector2 diskPosition = rb2d.position;
+
+        float xFieldSize = 14f;
+        float yFieldSize = 8.2f;
+
+        float distanceToTopLeftCorner = (diskPosition - new Vector2(-xFieldSize / 2, yFieldSize / 2)).magnitude;
+        float distanceToTopRightCorner = (diskPosition - new Vector2(xFieldSize / 2, yFieldSize / 2)).magnitude;
+        float distanceToBottomLeftCorner = (diskPosition - new Vector2(-xFieldSize / 2, -yFieldSize / 2)).magnitude;
+        float distanceToBottomRightCorner = (diskPosition - new Vector2(xFieldSize / 2, -yFieldSize / 2)).magnitude;
+
+        float cornerThreshold = 0.1f;
+
+        return (
+            distanceToTopLeftCorner < cornerThreshold ||
+            distanceToTopRightCorner < cornerThreshold ||
+            distanceToBottomLeftCorner < cornerThreshold ||
+            distanceToBottomRightCorner < cornerThreshold
+        );
     }
 
     void ResetBall()
